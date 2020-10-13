@@ -1,4 +1,3 @@
-const gameScreen = document.getElementById('gameScreen');
 const BG_COLOUR = '#231f20';
 const SNAKE_COLOUR = "#c2c2c2";
 const FOOD_COLOUR = "#e66916";
@@ -6,11 +5,43 @@ const FOOD_COLOUR = "#e66916";
 const socket = io('http://localhost:3000');
 
 socket.on('init', handleInit);
-socket.on('gameState', handleGameState)
+socket.on('gameState', handleGameState);
+socket.on('gameOver', handleGameOver);
+socket.on('gameCode', handleGameCode);
+socket.on('unknownCode', handleUnknownGame);
+socket.on('tooManyPlayers', handleTooManyPlayers)
+
+const gameScreen = document.getElementById('gameScreen');
+const initialScreen = document.getElementById('initialScreen');
+const newGameBtn = document.getElementById('newGameButton');
+const joinGameBtn = document.getElementById('joinGameButton');
+const gameCodeInput = document.getElementById('gameCodeInput');
+const gameCodeDisplay = document.getElementById('gameCodeDisplay');
+
+newGameBtn.addEventListener('click', newGame);
+joinGameBtn.addEventListener('click', joinGame);
+
+function newGame(){
+    console.log("emitting newGame")
+    socket.emit('newGame');
+    init();
+}
+
+function joinGame(){
+    const code = gameCodeInput.value;
+    console.log("game that we inputted", code)
+    socket.emit('joinGame', code);
+    init();
+}
 
 let canvas, ctx;
+let playerNumber;
+let gameActive = false;
 
 function init() {
+    initialScreen.style.display = "none";
+    gameScreen.style.display = "block";
+
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
 
@@ -20,15 +51,16 @@ function init() {
     ctx.fillRect(0,0, canvas.width, canvas.height);
 
     document.addEventListener('keydown', keydown);
+    gameActive = true;
 }
 
 function keydown(e) {
     socket.emit('keydown', e.keyCode);
 }
 
-init();
 
 function paintGame(state) {
+    console.log("paintGame state: ", state)
     ctx.fillStyle = BG_COLOUR;
     ctx.fillRect(0,0, canvas.width, canvas.height);
 
@@ -39,7 +71,8 @@ function paintGame(state) {
     ctx.fillStyle = FOOD_COLOUR;
     ctx.fillRect(food.x * size, food.y * size, size, size);
 
-    paintPlayer(state.player, size, SNAKE_COLOUR);
+    paintPlayer(state.players[0], size, SNAKE_COLOUR);
+    paintPlayer(state.players[1], size, 'red');
 }
 
 function paintPlayer(playerState, size, colour) {
@@ -51,11 +84,51 @@ function paintPlayer(playerState, size, colour) {
     }
 }
 
-function handleInit(msg){
-    console.log(msg)
+function handleInit(number){
+    playerNumber = number;
 }
 
 function handleGameState(gameState) {
+    console.log(gameState)
+    if(!gameActive) {
+        return;
+    }
     gameState = JSON.parse(gameState);
     requestAnimationFrame(() => paintGame(gameState));
+}
+
+function handleGameOver(data) {
+    if(!gameActive) {
+        return;
+    }
+    data = JSON.parse(data);
+
+    gameActive = false;
+
+    if (data.winner === playerNumber) {
+        alert("You win")
+    } else {
+        alert("You lose")
+    }
+}
+
+function handleGameCode(gameCode) {
+    gameCodeDisplay.innerText = gameCode;
+}
+
+function handleUnknownGame(){
+    reset();
+    alert("Unknown game code");
+}
+
+function handleTooManyPlayers(){
+    reset();
+    alert("This game is already in progress");
+}
+
+function reset(){
+    playerNumber = null;
+    gameCodeInput.value = "";
+    initialScreen.style.display = "block";
+    gameScreen.style.display = "none";
 }
