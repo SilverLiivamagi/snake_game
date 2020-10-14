@@ -13,7 +13,7 @@ function initGame() {
 }
 
 function createGameState() {
-     return {
+    return {
         players: [{
             pos: {
                 x: 3,
@@ -24,24 +24,23 @@ function createGameState() {
                 y: 0,
             },
             snake: [
-                {x:1, y:10},
-                {x:2, y:10},
-                {x:3, y:10},
+                {x: 1, y: 10},
+                {x: 2, y: 10},
+                {x: 3, y: 10},
             ],
-        },
-        {
+        }, {
             pos: {
                 x: 18,
                 y: 10,
             },
             vel: {
-                x: 1,
+                x: 0,
                 y: 0,
             },
             snake: [
-                {x:20, y:10},
-                {x:19, y:10},
-                {x:18, y:10},
+                {x: 20, y: 10},
+                {x: 19, y: 10},
+                {x: 18, y: 10},
             ],
         }],
         food: {},
@@ -55,7 +54,7 @@ function gameLoop(state) {
     }
 
     const playerOne = state.players[0];
-    const playerTwo= state.players[1];
+    const playerTwo = state.players[1];
 
     playerOne.pos.x += playerOne.vel.x;
     playerOne.pos.y += playerOne.vel.y;
@@ -106,7 +105,7 @@ function gameLoop(state) {
                 return 1;
             }
         }
-        playerTwo.snake.push({ ...playerOne.pos});
+        playerTwo.snake.push({ ...playerTwo.pos});
         playerTwo.snake.shift();
     }
 
@@ -135,18 +134,18 @@ function randomFood(state) {
 }
 
 function getUpdatedVelocity(keyCode) {
-    switch(keyCode) {
+    switch (keyCode) {
         case 37: { //left
-            return {x: -1, y:0};
+            return {x: -1, y: 0};
         }
         case 38: { //down
-            return {x: 0, y:-1}
+            return {x: 0, y: -1}
         }
         case 39: { //right
-            return {x: 1, y:0}
+            return {x: 1, y: 0}
         }
         case 40: { //down
-            return {x: 0, y:1}
+            return {x: 0, y: 1}
         }
     }
 }

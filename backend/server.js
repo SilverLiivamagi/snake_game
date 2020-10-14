@@ -43,9 +43,7 @@ io.on('connection', client => {
     }
 
     function handleNewGame() {
-        console.log("handleNewGame")
         let roomName = makeId(5);
-        console.log("roomName", roomName)
         clientRooms[client.id] = roomName;
         client.emit('gameCode', roomName);
     
@@ -82,7 +80,7 @@ io.on('connection', client => {
 function startGameInterval(roomName) {
     const intervalId = setInterval(() => {
         const winner = gameLoop(state[roomName]);
-        console.log('interval')
+
         if(!winner) {
             emitGameState(roomName, state[roomName]);
         } else {
@@ -94,11 +92,13 @@ function startGameInterval(roomName) {
 }
 
 function emitGameState(roomName, gameState){
-    io.sockets.in(roomName).emit('gameState', JSON.stringify(gameState));
+    io.sockets.in(roomName)
+        .emit('gameState', JSON.stringify(gameState));
 }
 
 function emitGameOver(roomName, winner){
-    io.sockets.in(roomName).emit('gameOver', JSON.stringify({ winner}));
+    io.sockets.in(roomName)
+        .emit('gameOver', JSON.stringify({ winner}));
 }
 
 io.listen(3000);
